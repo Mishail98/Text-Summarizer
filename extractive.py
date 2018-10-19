@@ -1,4 +1,5 @@
 import sys
+from nltk.stem import PorterStemmer
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
 
@@ -8,6 +9,7 @@ f = open(fname,'r')
 article = f.read()
 f.close()
 
+ps = PorterStemmer()
 sentences = sent_tokenize(article)
 sentenceRank = dict()
 
@@ -15,10 +17,11 @@ article = article.lower()
 
 stopWords = list(stopwords.words("english"))
 words = word_tokenize(article)
+wordsStemmed = [ps.stem(word) for word in words]
 
 wordFreq = dict()
 
-for word in words:
+for word in wordsStemmed:
     if word in stopWords or word.isalpha() == False:
         continue
     if word in wordFreq:
@@ -27,8 +30,9 @@ for word in words:
         wordFreq[word] = 1
 
 for sentence in sentences:
+    sentWordsTokenized = [ps.stem(word.lower()) for word in word_tokenize(sentence)]
     for word in wordFreq:
-        if(word in sentence.lower()):
+        if(word in sentWordsTokenized):
             if(sentence in sentenceRank):
                 sentenceRank[sentence] += wordFreq[word]
             else:
@@ -51,5 +55,6 @@ for sentence in sentences:
         summary += " " + sentence
 
 g = open('exclude/summary.txt','w')
+g.write(summary)
 print(summary)
 g.close()
